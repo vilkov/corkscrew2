@@ -1,6 +1,10 @@
 # 3rdparty
 
 
+# CMake tools
+include ("collect_sources")
+
+
 # Tools defines
 add_definitions (
     -DTOOLS_THREADS_BACKEND_BOOST
