@@ -21,6 +21,21 @@ public:
 	struct CopyPolicy { enum Type { CreateCopy, CopyOnWrite }; };
 	struct ReferencePolicy { enum Type { CreateCopy, Reference }; };
 
+	class Concatenator
+	{
+	public:
+		inline Concatenator(const PByteArray &s1, const PByteArray &s2);
+		inline Concatenator &operator+=(const PByteArray &s);
+		inline Concatenator &operator+(const Concatenator &other);
+		inline Concatenator &operator+(const PByteArray &s);
+		inline operator PByteArray() const;
+
+	private:
+		unsigned char m_index;
+		const PByteArray *m_data[10];
+		PByteArray::size_type m_total;
+	};
+
 public:
 	/********** Constructors **********/
 	PByteArray()
@@ -353,5 +368,63 @@ private:
 #undef IMP_C
 #undef IMP_O
 #undef IMP_S
+
+
+PByteArray::Concatenator::Concatenator(const PByteArray &s1, const PByteArray &s2) :
+	m_index(1),
+	m_total(s1.size() + s2.size())
+{
+	m_data[0] = &s1;
+	m_data[1] = &s2;
+}
+
+PByteArray::Concatenator &PByteArray::Concatenator::operator+=(const PByteArray &s)
+{
+	m_data[++m_index] = &s;
+	m_total += s.size();
+	return *this;
+}
+
+PByteArray::Concatenator &PByteArray::Concatenator::operator+(const Concatenator &other)
+{
+	memcpy(m_data + (++m_index), other.m_data, other.m_index);
+	m_index += other.m_index;
+	m_total += other.m_total;
+
+	return *this;
+}
+
+PByteArray::Concatenator &PByteArray::Concatenator::operator+(const PByteArray &s)
+{
+	m_data[++m_index] = &s;
+	return *this;
+}
+
+PByteArray::Concatenator::operator PByteArray() const
+{
+	PByteArray res(m_total);
+
+	if (res.capacity() > 0)
+	{
+		PByteArray::size_type toCopy;
+		PByteArray::size_type copied = 0;
+
+		for (unsigned char i = 0; i <= m_index; ++i)
+		{
+			memcpy(res.data() + copied, m_data[i]->data(), toCopy = m_data[i]->size());
+			copied += toCopy;
+		}
+
+		res.truncate(copied);
+	}
+
+	return res;
+}
+
+
+inline PByteArray::Concatenator operator+(const PByteArray &s1, const PByteArray &s2)
+{
+	return PByteArray::Concatenator(s1, s2);
+}
 
 #endif /* PBYTEARRAY_H_ */

@@ -127,9 +127,8 @@ void DynamicByteArray::truncate(size_type pos)
 	if (m_data->size == 0)
 		if (pos < m_data->capacity)
 		{
-			m_data->size = pos;
 			m_data->capacity -= pos;
-			m_data->string[m_data->size] = 0;
+			m_data->string[m_data->size = pos] = 0;
 		}
 		else
 		{
@@ -141,15 +140,13 @@ void DynamicByteArray::truncate(size_type pos)
 		if (pos < m_data->size)
 		{
 			m_data->capacity += m_data->size - pos;
-			m_data->size = pos;
-			m_data->string[m_data->size] = 0;
+			m_data->string[m_data->size = pos] = 0;
 		}
 		else
 			if (pos < m_data->size + m_data->capacity)
 			{
 				m_data->capacity = m_data->size + m_data->capacity - pos;
-				m_data->size = pos;
-				m_data->string[m_data->size] = 0;
+				m_data->string[m_data->size = pos] = 0;
 			}
 }
 
