@@ -17,20 +17,6 @@
 #include <sys/filio.h>
 #endif
 
-#if __STDC__
-#  ifndef NOPROTOS
-#    define PARAMS(args)      args
-#  endif
-#endif
-#ifndef PARAMS
-#  define PARAMS(args)        ()
-#endif
-
-char *base64_encodei PARAMS((char *in));
-void usage PARAMS((void));
-int sock_connect PARAMS((const char *hname, int port));
-int main PARAMS((int argc, char *argv[]));
-
 #define BUFSIZE 4096
 /*
 char linefeed[] = "\x0A\x0D\x0A\x0D";
@@ -42,85 +28,85 @@ char linefeed[] = "\r\n\r\n"; /* it is better and tested with oops & squid */
 ** Copyright (C) 2001 Tamas SZERB <toma@rulez.org>
 */
 
-const static char base64[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+//const static char base64[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* the output will be allocated automagically */
-#ifdef ANSI_FUNC
-char *base64_encode (char *in)
-#else
-char * base64_encode (in)
-char *in;
-#endif
-{
-	char *src, *end;
-	char *buf, *ret;
-
-	unsigned int tmp;
-	
-	int i,len;
-
-	len = strlen(in);
-	if (!in)
-		return NULL;
-	else
-		len = strlen(in);
-
-	end = in + len;
-
-	buf = malloc(4 * ((len + 2) / 3) + 1);
-	if (!buf)
-		return NULL;
-	ret = buf;
-
-
-	for (src = in; src < end - 3;) {
-		tmp = *src++ << 24;
-		tmp |= *src++ << 16;
-		tmp |= *src++ << 8;
-
-		*buf++ = base64[tmp >> 26];
-		tmp <<= 6;
-		*buf++ = base64[tmp >> 26];
-		tmp <<= 6;
-		*buf++ = base64[tmp >> 26];
-		tmp <<= 6;
-		*buf++ = base64[tmp >> 26];
-	}
-
-	tmp = 0;
-	for (i = 0; src < end; i++)
-		tmp |= *src++ << (24 - 8 * i);
-
-	switch (i) {
-		case 3:
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-		break;
-		case 2:
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-			*buf++ = '=';
-		break;
-		case 1:
-			*buf++ = base64[tmp >> 26];
-			tmp <<= 6;
-			*buf++ = base64[tmp >> 26];
-			*buf++ = '=';
-			*buf++ = '=';
-		break;
-	}
-
-	*buf = 0;
-	return ret;
-}
+//#ifdef ANSI_FUNC
+//char *base64_encode (char *in)
+//#else
+//char * base64_encode (in)
+//char *in;
+//#endif
+//{
+//	char *src, *end;
+//	char *buf, *ret;
+//
+//	unsigned int tmp;
+//
+//	int i,len;
+//
+//	len = strlen(in);
+//	if (!in)
+//		return NULL;
+//	else
+//		len = strlen(in);
+//
+//	end = in + len;
+//
+//	buf = malloc(4 * ((len + 2) / 3) + 1);
+//	if (!buf)
+//		return NULL;
+//	ret = buf;
+//
+//
+//	for (src = in; src < end - 3;) {
+//		tmp = *src++ << 24;
+//		tmp |= *src++ << 16;
+//		tmp |= *src++ << 8;
+//
+//		*buf++ = base64[tmp >> 26];
+//		tmp <<= 6;
+//		*buf++ = base64[tmp >> 26];
+//		tmp <<= 6;
+//		*buf++ = base64[tmp >> 26];
+//		tmp <<= 6;
+//		*buf++ = base64[tmp >> 26];
+//	}
+//
+//	tmp = 0;
+//	for (i = 0; src < end; i++)
+//		tmp |= *src++ << (24 - 8 * i);
+//
+//	switch (i) {
+//		case 3:
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//		break;
+//		case 2:
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//			*buf++ = '=';
+//		break;
+//		case 1:
+//			*buf++ = base64[tmp >> 26];
+//			tmp <<= 6;
+//			*buf++ = base64[tmp >> 26];
+//			*buf++ = '=';
+//			*buf++ = '=';
+//		break;
+//	}
+//
+//	*buf = 0;
+//	return ret;
+//}
 
 #ifdef ANSI_FUNC
 void usage (void)
@@ -128,7 +114,7 @@ void usage (void)
 void usage ()
 #endif
 {
-	printf("corkscrew %s (agroman@agroman.net)\n\n", VERSION);
+	printf("corkscrew %s (agroman@agroman.net)\n\n", "123");
 	printf("usage: corkscrew <proxyhost> <proxyport> <desthost> <destport> [authfile]\n");
 }
 
@@ -204,7 +190,7 @@ char *argv[];
 			} else {
 				char line[4096];
 				fscanf(fp, "%s", line);
-				up = malloc(sizeof(line));
+				up = static_cast<char*>(malloc(sizeof(line)));
 				up = line;
 				fclose(fp);
 			}
@@ -221,7 +207,7 @@ char *argv[];
 	strncat(uri, " HTTP/1.0", sizeof(uri) - strlen(uri) - 1);
 	if ((argc == 6) || (argc == 7)) {
 		strncat(uri, "\nProxy-Authorization: Basic ", sizeof(uri) - strlen(uri) - 1);
-		strncat(uri, base64_encode(up), sizeof(uri) - strlen(uri) - 1);
+//		strncat(uri, base64_encode(up), sizeof(uri) - strlen(uri) - 1);
 	}
 	strncat(uri, linefeed, sizeof(uri) - strlen(uri) - 1);
 
